@@ -35,8 +35,9 @@ type ActionType = RemoveTaskActionType |
     AddTodolistActionType |
     RemoveTodolistActionType
 
-export const tasksReducer = (state: TaskStateType, action: ActionType) => {
-    debugger
+const initialState: TaskStateType =  {}
+
+export const tasksReducer = (state: TaskStateType = initialState, action: ActionType) => {
     switch (action.type) {
         case 'REMOVE-TASK':{
             state[action.todoListID] = state[action.todoListID].filter(task => task.id !== action.taskID)
@@ -47,16 +48,16 @@ export const tasksReducer = (state: TaskStateType, action: ActionType) => {
             state[action.todoListID] = [newTask, ...state[action.todoListID]]
             return {...state}
         case 'CHANGE-TASK-STATUS':{
-            let task = state[action.todoListID].find((task) => task.id === action.taskID)
-            if (task) {
-                task.isDone = action.isDone
-            }
+            let todolistTasks = state[action.todoListID]
+            state[action.todoListID] = todolistTasks.map(task => task.id === action.taskID
+                ? {...task, isDone: action.isDone}
+                : task)
             return {...state}}
         case 'CHANGE-TASK-TITTLE':{
-            let task = state[action.todoListID].find((task) => task.id === action.taskID)
-            if (task) {
-                task.title = action.title
-            }
+            let todolistTasks = state[action.todoListID]
+            state[action.todoListID] = todolistTasks.map(task => task.id === action.taskID
+            ?{...task, title: action.title}
+            :task)
             return {...state}}
         case 'ADD-TODOLIST':{
             return{...state, [action.todolistID]: []}
@@ -65,7 +66,7 @@ export const tasksReducer = (state: TaskStateType, action: ActionType) => {
             delete state[action.id]
             return {...state}
         default:
-            throw new Error("I don't understand this type")
+            return state
     }
 }
 

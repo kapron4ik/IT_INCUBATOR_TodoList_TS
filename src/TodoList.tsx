@@ -1,11 +1,12 @@
-import React, {ChangeEvent} from "react";
-import {FilterValuesType, TaskType} from "./App";
+import React, {ChangeEvent, useCallback} from "react";
+import {FilterValuesType, TaskType} from "./AppWithRedux";
 import {AddItemForm} from "./AddItemForm";
 import {EditableSpan} from "./EditableSpan";
 import {IconButton} from "@material-ui/core";
 import {Delete} from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
+import Task from "./Task";
 
 
 type PropsType = {
@@ -24,25 +25,34 @@ type PropsType = {
 }
 
 
-function TodoList(props: PropsType) {
-
-    const onAllClickHandler = () => {
+const TodoList = React.memo(function (props: PropsType) {
+    console.log("Todolist is called")
+    const onAllClickHandler = useCallback(() => {
         props.changeFilter("all", props.id)
-    }
-    const onActiveClickHandler = () => {
+    }, [props.changeFilter, props.id])
+    const onActiveClickHandler = useCallback(() => {
         props.changeFilter("active", props.id)
-    }
-    const onCompletedClickHandler = () => {
+    }, [props.changeFilter, props.id])
+    const onCompletedClickHandler = useCallback(() => {
         props.changeFilter("completed", props.id)
-    }
+    }, [props.changeFilter, props.id])
 
-    function addTask(tittle: string) {
+    const addTask = useCallback((tittle: string) => {
         props.addTask(tittle, props.id)
+    }, [props.addTask, props.id])
+
+    const changeTodoListTitle = useCallback((newValue: string) => {
+        props.changeTodoListTitle(props.id, newValue)
+    }, [props.changeTodoListTitle, props.id])
+
+    let tasksforTodoList = props.tasks
+    if (props.filter === "active") {
+        tasksforTodoList = props.tasks.filter(task => !task.isDone)
+    }
+    if (props.filter === "completed") {
+        tasksforTodoList = props.tasks.filter(task => task.isDone)
     }
 
-    function changeTodoListTitle(newValue: string) {
-        props.changeTodoListTitle(props.id, newValue)
-    }
 
     return (
         <div>
@@ -56,25 +66,15 @@ function TodoList(props: PropsType) {
             <AddItemForm addItem={addTask}/>
             <ul style={{listStyle: "none", paddingLeft: "0"}}>
                 {
-                    props.tasks.map(task => {
-                        const onClickHandler = () => props.removeTask(task.id, props.id)
-                        const onClickTaskStatus = (e: ChangeEvent<HTMLInputElement>) => props.changeTaskStatus(task.id, e.currentTarget.checked, props.id)
-                        const onClickTaskTitle = (newValue: string) => props.changeTaskTitle(task.id, newValue, props.id)
-                        return (
-                            <li key={task.id}
-                                className={task.isDone ? "is-done" : ""}>
-                                <Checkbox onChange={onClickTaskStatus}
-                                          checked={task.isDone}
-                                          color="primary"
-                                />
-                                <EditableSpan title={task.title}
-                                              onChangeTitle={onClickTaskTitle}/>
-                                <IconButton onClick={onClickHandler}>
-                                    <Delete/>
-                                </IconButton>
-                            </li>
-                        )
-                    })
+                    tasksforTodoList.map(task => <Task
+                            key={task.id}
+                            todolistId={props.id}
+                            task={task}
+                            removeTask={props.removeTask}
+                            addTask={addTask}
+                            changeTaskStatus={props.changeTaskStatus}
+                            changeTaskTitle={props.changeTaskTitle}
+                        />)
                 }
             </ul>
             <div>
@@ -102,7 +102,7 @@ function TodoList(props: PropsType) {
             </div>
         </div>
     );
-}
+})
 
 export default TodoList;
 
