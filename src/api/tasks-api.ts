@@ -40,8 +40,7 @@ export const taskAPI = {
         return promise
     },
     deleteTask(todolistId: string, taskId: string) {
-        const promise = instanse.delete(`todo-lists/${todolistId}/tasks/${taskId}`)
-        return promise
+        return instanse.delete(`todo-lists/${todolistId}/tasks/${taskId}`)
     }
 
 }
