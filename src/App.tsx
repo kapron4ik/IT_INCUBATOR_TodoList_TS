@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import TodoList from "./TodoList";
 import {v1} from "uuid";
@@ -12,6 +12,9 @@ import {Menu} from "@material-ui/icons";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
+import { todolistAPI } from './api/todolist-api';
+import { useDispatch } from 'react-redux';
+import { setTodolistAC } from './state/todolists-reducer';
 
 export type TaskType = {
     id: string
@@ -22,7 +25,9 @@ export type TaskType = {
 export type TodolistType = {
     id: string
     title: string
-    filter: FilterValuesType
+    filter?: FilterValuesType
+    addedDate?: string
+    order?: number
 }
 
 export type TaskStateType = {
@@ -32,13 +37,10 @@ export type TaskStateType = {
 export type FilterValuesType = "all" | "active" | "completed"
 
 function App() {
-    // const [tasks, setTasks] = useState<Array<TaskType>>([
-    //     {id: v1(), title: "React", isDone: false},
-    //     {id: v1(), title: "HTML", isDone: true},
-    //     {id: v1(), title: "CSS", isDone: true},
-    //     {id: v1(), title: "Redux", isDone: true},
-    //     {id: v1(), title: "SaSS", isDone: false}
-    // ])
+
+    const dispatch = useDispatch()
+
+
     const todolistID1 = v1()
     const todolistID2 = v1()
 
@@ -115,16 +117,6 @@ function App() {
         setTodoLists([...todoLists])
     }
 
-    // function taskFilter() {
-    //     let tasksforTodoList = tasks
-    //     if (filter === "active") {
-    //         tasksforTodoList = tasks.filter(task => task.isDone === false)
-    //     }
-    //     if (filter === "completed") {
-    //         tasksforTodoList = tasks.filter(task => task.isDone === true)
-    //     }
-    //     return tasksforTodoList
-    // }
     function addTodoLists(title: string) {
         const newTodoList: TodolistType = {
             id: v1(),
@@ -179,7 +171,7 @@ function App() {
                                             changeFilter={changeFilter}
                                             changeTaskStatus={changeTaskStatus}
                                             changeTaskTitle={changeTaskTitle}
-                                            filter={tl.filter}
+                                            filter={tl.filter?tl.filter:"all"}
                                             removeTodoList={removeTodoList}
                                             changeTodoListTitle={changeTodoListTitle}
                                         />
